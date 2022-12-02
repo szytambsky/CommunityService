@@ -30,6 +30,6 @@ public class PostController {
 
     @GetMapping("/posts/{id}")
     public Post getSinglePost(@PathVariable("id") long id) {
-        throw new IllegalArgumentException("Not implemented yet!");
+        return postService.getSinglePost(id);
     }
 }
