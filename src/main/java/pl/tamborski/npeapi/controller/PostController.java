@@ -1,11 +1,13 @@
 package pl.tamborski.npeapi.controller;
 
 import io.swagger.annotations.Api;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.tamborski.npeapi.model.Post;
+import pl.tamborski.npeapi.service.PostService;
 
 import java.util.List;
 
@@ -14,14 +16,16 @@ import java.util.List;
 @Api(tags = "Post Resource")
 public class PostController {
 
-    @GetMapping("/hello")
-    public String getHello() {
-        return "Hello wordl!";
+    private final PostService postService;
+
+    @Autowired
+    public PostController(PostService postService) {
+        this.postService = postService;
     }
 
     @GetMapping("/posts")
     public List<Post> getPosts() {
-        throw new IllegalArgumentException("Not implemented yet!");
+        return postService.getPosts();
     }
 
     @GetMapping("/posts/{id}")
