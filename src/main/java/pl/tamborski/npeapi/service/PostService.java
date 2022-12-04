@@ -12,6 +12,7 @@ import java.util.List;
 @Service
 public class PostService {
 
+    private static final int PAGE_SIZE = 20;
     private final PostRepository postRepository;
 
     @Autowired
@@ -20,7 +21,7 @@ public class PostService {
     }
 
     public List<Post> getPosts(int page) {
-        return postRepository.findAllPosts(PageRequest.of(page, 20));
+        return postRepository.findAllPosts(PageRequest.of(page, PAGE_SIZE));
     }
 
     public Post getSinglePost(long id) {
