@@ -2,6 +2,7 @@ package pl.tamborski.npeapi.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pl.tamborski.npeapi.model.Comment;
 import pl.tamborski.npeapi.model.Post;
@@ -25,8 +26,12 @@ public class PostService {
         this.commentRepository = commentRepository;
     }
 
-    public List<Post> getPosts(int page) {
-        return postRepository.findAllPosts(PageRequest.of(page, PAGE_SIZE));
+    public List<Post> getPosts(int page, Sort.Direction sort) {
+        return postRepository.findAllPosts(
+                PageRequest.of(
+                        page, PAGE_SIZE, Sort.by(sort, "id")
+                )
+        );
     }
 
     public Post getSinglePost(long id) {
@@ -34,8 +39,11 @@ public class PostService {
                 .orElseThrow();
     }
 
-    public List<Post> getPostsWithComments(int page) {
-        List<Post> allPosts = postRepository.findAllPosts(PageRequest.of(page, PAGE_SIZE));
+    public List<Post> getPostsWithComments(int page, Sort.Direction sort) {
+        List<Post> allPosts = postRepository.findAllPosts(
+                PageRequest.of(
+                        page, PAGE_SIZE, Sort.by(sort, "id")
+                ));
         List<Long> postIds = allPosts.stream()
                 .map(Post::getId)
                 .toList();

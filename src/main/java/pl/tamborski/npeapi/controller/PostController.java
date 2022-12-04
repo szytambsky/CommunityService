@@ -2,6 +2,7 @@ package pl.tamborski.npeapi.controller;
 
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,15 +28,15 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public List<PostDto> getPosts(@RequestParam(required = false) int page) {
+    public List<PostDto> getPosts(@RequestParam(required = false) int page, Sort.Direction sort) {
         int pageNumber = page >= 0 ? page : 0;
-        return PostDtoMapper.mapToPostDtos(postService.getPosts(pageNumber));
+        return PostDtoMapper.mapToPostDtos(postService.getPosts(pageNumber, sort));
     }
 
     @GetMapping("/posts/comments")
-    public List<Post> getPostsWithComments(@RequestParam(required = false) int page) {
+    public List<Post> getPostsWithComments(@RequestParam(required = false) int page, Sort.Direction sort) {
         int pageNumber = page >= 0 ? page : 0;
-        return postService.getPostsWithComments(pageNumber);
+        return postService.getPostsWithComments(pageNumber, sort);
     }
 
     @GetMapping("/posts/{id}")
