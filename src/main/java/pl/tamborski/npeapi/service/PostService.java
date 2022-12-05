@@ -9,6 +9,7 @@ import pl.tamborski.npeapi.model.Post;
 import pl.tamborski.npeapi.repository.CommentRepository;
 import pl.tamborski.npeapi.repository.PostRepository;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,5 +58,21 @@ public class PostService {
         return comments.stream()
                 .filter(comment -> comment.getPostId() == id)
                 .collect(Collectors.toList());
+    }
+
+    public Post addPost(Post post) {
+        return postRepository.save(post);
+    }
+
+    @Transactional
+    public Post editPost(Post post) {
+        Post postEdited = postRepository.findById(post.getId()).orElseThrow();
+        postEdited.setTitle(post.getTitle());
+        postEdited.setContent(post.getContent());
+        return postRepository.save(postEdited);
+    }
+
+    public void deletePost(long id) {
+        postRepository.deleteById(id);
     }
 }
