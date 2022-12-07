@@ -1,22 +1,17 @@
 package pl.tamborski.npeapi.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.security.cert.Extension;
@@ -27,18 +22,19 @@ import java.security.cert.Extension;
 public class SecurityConfiguration {
 
     private final DataSource dataSource;
-    private final ObjectMapper objectMapper;
-    private final RestAuthenticationSuccessHandler successHandler;
-    private final RestAuthenticationFailureHandler failureHandler;
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication()
-                .dataSource(dataSource)
+        auth.jdbcAuthentication().dataSource(dataSource)
                 .withDefaultSchema()
-                .withUser("test").password(new BCryptPasswordEncoder().encode("test")).roles("USER")
+                .withUser("test").password(passwordEncoder().encode("test")).roles("USER")
                 .and()
-                .withUser("admin").password(new BCryptPasswordEncoder().encode("password")).roles("USER", "ADMIN");
+                .withUser("admin").password(passwordEncoder().encode("password")).roles("USER", "ADMIN");
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -46,7 +42,6 @@ public class SecurityConfiguration {
         http.csrf().disable();
         http.authorizeRequests()
                 .antMatchers("/swagger-ui/index.html#/").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
                 .antMatchers("/v3/api-docs").permitAll()
                 .antMatchers("/v2/api-docs").permitAll()
                 .antMatchers("/webjars/**").permitAll()
@@ -54,28 +49,11 @@ public class SecurityConfiguration {
                 .antMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(authenticationFilter())
-                .exceptionHandling()
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .formLogin().permitAll()
                 .and()
-                .headers().frameOptions().disable();
-                //.formLogin().permitAll()
+                .exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-
-    public JsonObjectAuthenticationFilter authenticationFilter() throws Exception {
-        JsonObjectAuthenticationFilter authenticationFilter = new JsonObjectAuthenticationFilter(objectMapper);
-        authenticationFilter.setAuthenticationSuccessHandler(successHandler);
-        authenticationFilter.setAuthenticationFailureHandler(failureHandler);
-//        authenticationFilter.setAuthenticationManager(authenticationManager(new AuthenticationConfiguration()));
-        //authenticationFilter.setAuthenticationManager(authenticationManager);
-        return authenticationFilter;
     }
 
 }
